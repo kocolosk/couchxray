@@ -1,29 +1,7 @@
-
-const couchURL = process.argv.length > 2 ? process.argv[2] : process.env.COUCH_URL
-if (!couchURL) {
-  console.error('Please supply CouchDB URL or COUCH_URL environment variable')
-  process.exit(1)
-}
-
-// parse the URL
-const url = require('url')
-const u = new url.URL(couchURL)
-let baseURL
-let databaseName
-if (u.pathname === '/') {
-  baseURL = couchURL
-} else {
-  databaseName = u.pathname.substr(1)
-  u.pathname = '/'
-  baseURL = u.toString()
-}
-
 // nano library
-const colorize = require('json-colorizer')
 const flatten = require('./lib/flatten.js')
 const Nano = require('nano')
-const nano = Nano(baseURL)
-const db = require('./lib/db.js')
+let nano
 
 const analyseDesignDocs = (ddocs) => {
   // design doc analysis
@@ -147,30 +125,31 @@ const analyseDesignDocs = (ddocs) => {
   }
   return obj
 }
-const main = async () => {
-  if (databaseName) {
-    const output = await analyseDatabase('cities')
-    console.log(colorize(output, { pretty: true }))
-  } else {
-    // iterate through each database
-    const databaseList = await db.getDatabaseList(nano)
-    for (var i in databaseList) {
-      const dbName = databaseList[i]
-      const output = await analyseDatabase(dbName)
-      const flattenedOutput = flatten(output)
-      if (i === '0') {
-        // output headers
-        const headers = Object.keys(flattenedOutput)
-        console.log(headers.join(','))
-      }
-      console.log(Object.values(flattenedOutput).join(','))
+
+const analyseAllDatabases = async (baseURL) => {
+  nano = Nano(baseURL)
+  // iterate through each database
+  const databaseList = await nano.db.list()
+  for (var i in databaseList) {
+    const dbName = databaseList[i]
+    const output = await analyseDatabase(baseURL, dbName)
+    const flattenedOutput = flatten(output)
+    if (i === '0') {
+      // output headers
+      const headers = Object.keys(flattenedOutput)
+      console.log(headers.join(','))
     }
+    console.log(Object.values(flattenedOutput).join(','))
   }
 }
 
-const analyseDatabase = async (dbName) => {
+const analyseDatabase = async (baseURL, dbName) => {
+  if (!nano) {
+    nano = Nano(baseURL)
+  }
+
   // database info
-  const info = await db.getInfo(nano, dbName)
+  const info = await nano.db.get(dbName)
   // console.log('info', info)
 
   /*  // shard info
@@ -215,4 +194,8 @@ const analyseDatabase = async (dbName) => {
   return output
 }
 
-main()
+module.exports = {
+  analyseDatabase,
+  analyseDesignDocs,
+  analyseAllDatabases
+}
