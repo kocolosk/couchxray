@@ -46,17 +46,18 @@ const analyseDesignDocs = (ddocs) => {
     if (ddoc.language && ddoc.language === 'query') {
       isQuery = true
     }
+    const isPartitioned = !!(ddoc.options && ddoc.options.partitioned === true)
     if (ddoc.views) {
       const len = Object.keys(ddoc.views).length
       if (isQuery) {
-        if (obj.partitioned) {
+        if (isPartitioned) {
           obj.partitioned.mangoJSON += len
         } else {
           obj.global.mangoJSON += len
         }
         obj.viewGroups.mango++
       } else {
-        if (obj.options && obj.options.partitioned === true) {
+        if (isPartitioned) {
           obj.partitioned.mapReduce += len
         } else {
           obj.global.mapReduce += len
@@ -64,39 +65,40 @@ const analyseDesignDocs = (ddocs) => {
         if (ddoc.options && ddoc.options.epi && ddoc.options.epi.dbcopy) {
           obj.dbcopy += Object.keys(ddoc.options.epi.dbcopy).length
         }
-        for (var j in ddoc.views) {
-          const view = ddoc.views[j]
-          if (view.dbcopy) {
-            obj.dbcopy++
-          }
-          if (!view.reduce) {
-            obj.reducers.none++
-          } else if (builtInReducers.indexOf(view.reduce) > -1) {
-            obj.reducers[view.reduce]++
-          } else {
-            obj.reducers.custom++
-          }
-        }
         obj.viewGroups.mapReduce++
+      }
+      for (var j in ddoc.views) {
+        const view = ddoc.views[j]
+        if (view.dbcopy) {
+          obj.dbcopy++
+        }
+        if (!view.reduce) {
+          obj.reducers.none++
+        } else if (builtInReducers.indexOf(view.reduce) > -1) {
+          obj.reducers[view.reduce]++
+        } else {
+          obj.reducers.custom++
+        }
       }
     }
 
     if (ddoc.indexes) {
       const len = Object.keys(ddoc.indexes).length
       if (isQuery) {
-        if (obj.partitioned) {
+        if (isPartitioned) {
           obj.partitioned.mangoText += len
         } else {
           obj.global.mangoText += len
         }
+        obj.viewGroups.mango++
       } else {
-        if (obj.options && obj.options.partitioned === true) {
+        if (isPartitioned) {
           obj.partitioned.search += len
         } else {
           obj.global.search += len
         }
+        obj.viewGroups.search++
       }
-      obj.viewGroups.search++
     }
 
     if (ddoc.st_indexes) {

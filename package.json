@@ -4,7 +4,7 @@
   "description": "CouchDB feature usage tool",
   "main": "index.js",
   "scripts": {
-    "test": "standard",
+    "test": "standard; jest",
     "standard": "standard --fix"
   },
   "repository": {
