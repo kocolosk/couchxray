@@ -130,6 +130,7 @@ const analyseDesignDocs = (ddocs) => {
 
 const analyseAllDatabases = async (baseURL) => {
   nano = Nano(baseURL)
+  const retval = []
   // iterate through each database
   const databaseList = await nano.db.list()
   for (var i in databaseList) {
@@ -142,7 +143,9 @@ const analyseAllDatabases = async (baseURL) => {
       console.log(headers.join(','))
     }
     console.log(Object.values(flattenedOutput).join(','))
+    retval.push(output)
   }
+  return retval
 }
 
 const analyseDatabase = async (baseURL, dbName) => {
@@ -158,7 +161,7 @@ const analyseDatabase = async (baseURL, dbName) => {
   let req = {
     db: dbName,
     method: 'get',
-    path: '/_shards'
+    path: '_shards'
   }
   const shardInfo = await nano.request(req) */
 
@@ -166,7 +169,7 @@ const analyseDatabase = async (baseURL, dbName) => {
   const req = {
     db: dbName,
     method: 'get',
-    path: '/_all_docs',
+    path: '_all_docs',
     qs: {
       startkey: '_design',
       endkey: '_design0',
