@@ -27,6 +27,7 @@ const main = async () => {
     console.log(colorize(data, { pretty: true }))
   } else {
     await couchxray.analyseAllDatabases(baseURL)
+    process.exit(0)
   }
 }
 main()

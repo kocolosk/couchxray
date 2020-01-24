@@ -1,6 +1,7 @@
 // nano library
 const flatten = require('./lib/flatten.js')
 const Nano = require('nano')
+const qrate = require('qrate')
 let nano
 
 const analyseDesignDocs = (ddocs) => {
@@ -129,23 +130,36 @@ const analyseDesignDocs = (ddocs) => {
 }
 
 const analyseAllDatabases = async (baseURL) => {
-  nano = Nano(baseURL)
-  const retval = []
-  // iterate through each database
-  const databaseList = await nano.db.list()
-  for (var i in databaseList) {
-    const dbName = databaseList[i]
-    const output = await analyseDatabase(baseURL, dbName)
-    const flattenedOutput = flatten(output)
-    if (i === '0') {
-      // output headers
-      const headers = Object.keys(flattenedOutput)
-      console.log(headers.join(','))
+  const CONCURRENCY = 5
+  const REQUESTS_PER_SECOND = 5
+  return new Promise((resolve, reject) => {
+    nano = Nano(baseURL)
+    const retval = []
+
+    // queue of work
+    const worker = async (dbName) => {
+      const output = await analyseDatabase(baseURL, dbName)
+      const flattenedOutput = flatten(output)
+      if (retval.length === 0) {
+        // output headers
+        const headers = Object.keys(flattenedOutput)
+        console.log(headers.join(','))
+      }
+      console.log(Object.values(flattenedOutput).join(','))
+      retval.push(output)
     }
-    console.log(Object.values(flattenedOutput).join(','))
-    retval.push(output)
-  }
-  return retval
+
+    // iterate through each database
+    const q = qrate(worker, CONCURRENCY, REQUESTS_PER_SECOND)
+    nano.db.list().then((databaseList) => {
+      for (var i in databaseList) {
+        q.push(databaseList[i])
+      }
+    })
+    q.drain = () => {
+      resolve(retval)
+    }
+  })
 }
 
 const analyseDatabase = async (baseURL, dbName) => {
@@ -155,15 +169,6 @@ const analyseDatabase = async (baseURL, dbName) => {
 
   // database info
   const info = await nano.db.get(dbName)
-  // console.log('info', info)
-
-  /*  // shard info
-  let req = {
-    db: dbName,
-    method: 'get',
-    path: '_shards'
-  }
-  const shardInfo = await nano.request(req) */
 
   // design doc info
   const req = {
