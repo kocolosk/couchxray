@@ -124,6 +124,20 @@ test('analyseAllDatabases - two dbs', async () => {
         none: 0,
         custom: 0
       }
+    },
+    compatibility: {
+      couchDB1: {
+        ok: true
+      },
+      couchDB2: {
+        ok: true
+      },
+      couchDB3: {
+        ok: true
+      },
+      couchDB4: {
+        ok: true
+      }
     }
   }, {
     databaseName: 'testdb2',
@@ -168,6 +182,20 @@ test('analyseAllDatabases - two dbs', async () => {
         _approx_count_distinct: 0,
         none: 0,
         custom: 0
+      }
+    },
+    compatibility: {
+      couchDB1: {
+        ok: true
+      },
+      couchDB2: {
+        ok: true
+      },
+      couchDB3: {
+        ok: true
+      },
+      couchDB4: {
+        ok: true
       }
     }
   }]

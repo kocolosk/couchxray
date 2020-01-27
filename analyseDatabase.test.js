@@ -84,6 +84,20 @@ test('analyseDatabase - no design docs', async () => {
         none: 0,
         custom: 0
       }
+    },
+    compatibility: {
+      couchDB1: {
+        ok: true
+      },
+      couchDB2: {
+        ok: true
+      },
+      couchDB3: {
+        ok: true
+      },
+      couchDB4: {
+        ok: true
+      }
     }
   }
   expect(data).toStrictEqual(output)
@@ -185,6 +199,20 @@ test('analyseDatabase - one design doc', async () => {
         _approx_count_distinct: 0,
         none: 1,
         custom: 0
+      }
+    },
+    compatibility: {
+      couchDB1: {
+        ok: true
+      },
+      couchDB2: {
+        ok: true
+      },
+      couchDB3: {
+        ok: true
+      },
+      couchDB4: {
+        ok: true
       }
     }
   }

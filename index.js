@@ -2,6 +2,7 @@
 const flatten = require('./lib/flatten.js')
 const Nano = require('nano')
 const qrate = require('qrate')
+const compatibility = require('./lib/compatibility.js')
 let nano
 
 const analyseDesignDocs = (ddocs) => {
@@ -199,8 +200,13 @@ const analyseDatabase = async (baseURL, dbName) => {
     recommendedQDocs: Math.ceil((totalDocs + 1) / 10000000), // 10 million docs
     recommendedQBytes: Math.ceil((info.other.data_size + 1) / (10 * 1073741824)), // 10GB
     // designDocs: designDocs,
-    indexes: analyseDesignDocs(designDocs)
+    indexes: analyseDesignDocs(designDocs),
+    compatibility: { }
   }
+  output.compatibility.couchDB1 = compatibility.couchDB1(output)
+  output.compatibility.couchDB2 = compatibility.couchDB2(output)
+  output.compatibility.couchDB3 = compatibility.couchDB3(output)
+  output.compatibility.couchDB4 = compatibility.couchDB4(output)
   return output
 }
 
