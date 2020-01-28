@@ -1,6 +1,5 @@
 # couchxray
-
-_couchxray_ is a command-line tool which outputs the CouchDB features used by a database/databases and was inspired by the Python project [xray](https://github.com/cloudant-labs/xray) by Will Holley. On a per database basis, _couchxray outputs whether the database is using:
+_couchxray_ is a command-line tool which outputs the CouchDB features used by a database and was inspired by the Python project [xray](https://github.com/cloudant-labs/xray) by Will Holley. On a per database basis, _couchxray outputs whether it is using:
 
 - global MapReduce views and which reducers (built-in or bespoke) are being used.
 - Lucene-based search indexes or Cloudant-specific Geospatial indexes.
@@ -9,13 +8,13 @@ _couchxray_ is a command-line tool which outputs the CouchDB features used by a 
 - CouchDB features such as update/show/list/vdu functions.
 - dbcopy, a now-deprecated Cloudant-only feature.
 
-This information is useful when moving data between major versions of CouchDB. _couchxray_ outputs a "compatibility" object which shows which versions of CouchDB are suitable for hosting the databases e.g. if the database is using Lucene-based indexes then CouchDB 3+ would be required.
+This information is useful when moving data between major versions of CouchDB. _couchxray_ outputs a "compatibility" object which shows which versions of CouchDB are suitable for hosting the database e.g. if the database is using Lucene-based indexes then CouchDB 3+ would be required.
 
-The tool outputs data in JSON for single-database requests or as a CSV when profiling all the databases in a CouchDB cluster.
+The tool outputs data in JSON for single-database requests or as a CSV when profiling all the databases in a CouchDB instance.
 
 ## Installation
 
-Installation requires Node.js/npm to be installed:
+Installation requires [Node.js/npm](https://nodejs.org/en/) to be installed:
 
 ```sh
 npm install -g couchxray
@@ -25,9 +24,23 @@ npm install -g couchxray
 
 The URL containing the CouchDB service, including service credentials, should be supplied as a `COUCH_URL` environment variable or as the only command-line parameter.
 
+e.g.
+
+```sh
+> export COUCH_URL="https://username:password@host.cloudant.com"
+> couchxray
+```
+
+or
+
+```sh
+couchxray "https://username:password@host.cloudant.com"
+```
+
 ### Examining a single database
 
-Data is presented as JSON.
+If the URL supplied contains the database name, a single database is examined and the output data is presented as JSON.
+
 ```sh
 > couchxray http://admin:admin@localhost:5984/cities
 {
@@ -100,7 +113,7 @@ Data is presented as JSON.
 
 ### Examining all databases
 
-Data is presented as a CSV file:
+If the URL points to the "top level" of the CouchDB service, all of the databases are examined and the output data is presented as a CSV file:
 
 ```sh
 > couchxray http://admin:admin@localhost:5984
@@ -118,20 +131,20 @@ abb,false,1,0,0,1,154507,20,16,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
 | databaseName                            | The name of the database                                                                 |
 |-----------------------------------------|------------------------------------------------------------------------------------------|
-| partitioned                             | If the database is partitioned or not                                                    |
+| partitioned                             | If the database is [partitioned](https://docs.couchdb.org/en/master/partitioned-dbs/index.html) or not                                                    |
 | numDocs                                 | The number of regular documents                                                          |
 | numDeletions                            | The number of deleted documents                                                          |
-| numDesignDocs                           | The number of design documents                                                           |
+| numDesignDocs                           | The number of [design documents](https://docs.couchdb.org/en/master/api/ddoc/index.html)                                                           |
 | totalDocs                               | Total number of documents                                                                |
 | diskSize                                | Disk space used                                                                          |
 | billableSize                            | Data size used in Cloudant billing                                                       |
-| q                                       | The number of shards                                                                     |
+| q                                       | The number of [shards](https://docs.couchdb.org/en/master/cluster/databases.html#creating-a-database)                                                                     |
 | recommendedQDocs                        | Recommended value of q given the document count                                          |
 | recommendedQBytes                       | Recommended value of q given the data size                                               |
-| indexes.global.mapReduce                | The number of global MapReduce indexes                                                   |
-| indexes.global.search                   | The number of global Lucene-based search indexes                                         |
-| indexes.global.geo                      | The number of geo-spatial indexes (Cloudant only)                                        |
-| indexes.global.mangoJSON                | The number of global Mango/MapReduce indexes                                             |
+| indexes.global.mapReduce                | The number of global [MapReduce](https://docs.couchdb.org/en/master/intro/tour.html#running-a-query-using-mapreduce) indexes                                                   |
+| indexes.global.search                   | The number of global [Lucene-based search](https://docs.couchdb.org/en/master/ddocs/search.html) indexes                                         |
+| indexes.global.geo                      | The number of [geo-spatial](https://cloud.ibm.com/docs/Cloudant?topic=cloudant-cloudant-nosql-db-geospatial) indexes (Cloudant only)                                        |
+| indexes.global.mangoJSON                | The number of global [Mango/MapReduce](https://docs.couchdb.org/en/master/api/database/find.html#api-db-find) indexes                                             |
 | indexes.global.mangoText                | The number of global Mango/Lucene indexes                                                |
 | indexes.partitioned.mapReduce           | The number of partitioned MapReduce indexes                                              |
 | indexes.partitioned.search              | The number of partitioned Lucene-based search indexes                                    |
@@ -140,15 +153,15 @@ abb,false,1,0,0,1,154507,20,16,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 | indexes.viewGroups.mapReduce            | The number of MapReduce view groups (design docs with one or more MapReduce definitions) |
 | indexes.viewGroups.search               | The number of search view groups                                                         |
 | indexes.viewGroups.mango                | The number of Mango view groups                                                          |
-| indexes.updates                         | Number of update functions                                                               |
-| indexes.shows                           | Number of show functions                                                                 |
-| indexes.lists                           | Number of list functions                                                                 |
-| indexes.vdus                            | Number of vdu functions                                                                  |
+| indexes.updates                         | Number of [update](https://docs.couchdb.org/en/master/ddocs/ddocs.html#update-functions) functions                                                               |
+| indexes.shows                           | Number of [show](https://docs.couchdb.org/en/master/ddocs/ddocs.html#show-functions) functions                                                                 |
+| indexes.lists                           | Number of [list](https://docs.couchdb.org/en/master/ddocs/ddocs.html#list-functions) functions                                                                 |
+| indexes.vdus                            | Number of [vdu](https://docs.couchdb.org/en/master/ddocs/ddocs.html#validate-document-update-functions) functions                                                                  |
 | indexes.dbcopy                          | Number of indexes defined to output their data to another database                       |
-| indexes.reducers._count                 | Number of indexes using the `_count` reducer                                             |
-| indexes.reducers._sum                   | Number of indexes using the `_sum` reducer                                               |
-| indexes.reducers._stats                 | Number of indexes using the `_stats` reducer                                             |
-| indexes.reducers._approx_count_distinct | Number of indexes using the approximate count reducer                                    |
+| indexes.reducers._count                 | Number of indexes using the [_count](https://docs.couchdb.org/en/master/ddocs/ddocs.html#_count) reducer                                             |
+| indexes.reducers._sum                   | Number of indexes using the [_sum](https://docs.couchdb.org/en/master/ddocs/ddocs.html#_sum) reducer                                               |
+| indexes.reducers._stats                 | Number of indexes using the [_stats](https://docs.couchdb.org/en/master/ddocs/ddocs.html#_stats) reducer                                             |
+| indexes.reducers._approx_count_distinct | Number of indexes using the [approximate count](https://docs.couchdb.org/en/master/ddocs/ddocs.html#_approx_count_distinct) reducer                                    |
 | indexes.reducers.none                   | Number of indexes using no reducer                                                       |
 | indexes.reducers.custom                 | Number of indexes using a user-defined reducer                                           |
 | compatibility.couchDB1.ok               | Compatible with CouchDB 1.x                                                              |
