@@ -34,7 +34,23 @@ e.g.
 or
 
 ```sh
+export COUCH_URL="https://username:password@host.cloudant.com"
+couchxray cities
+```
+
+or
+
+```sh
 couchxray "https://username:password@host.cloudant.com"
+```
+
+or
+
+
+or
+
+```sh
+couchxray "https://username:password@host.cloudant.com/cities"
 ```
 
 ### Examining a single database
