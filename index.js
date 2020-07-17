@@ -175,10 +175,8 @@ const analyseDatabase = async (baseURL, dbName) => {
   const req = {
     db: dbName,
     method: 'get',
-    path: '_all_docs',
+    path: '_design_docs',
     qs: {
-      startkey: '_design',
-      endkey: '_design0',
       include_docs: true
     }
   }

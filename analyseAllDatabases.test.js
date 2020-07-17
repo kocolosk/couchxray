@@ -73,11 +73,11 @@ test('analyseAllDatabases - two dbs', async () => {
     .reply(200, reply0)
     .get('/testdb1')
     .reply(200, reply1)
-    .get('/testdb1/_all_docs?startkey="_design"&endkey="_design0"&include_docs=true')
+    .get('/testdb1/_design_docs?include_docs=true')
     .reply(200, reply2)
     .get('/testdb2')
     .reply(200, reply3)
-    .get('/testdb2/_all_docs?startkey="_design"&endkey="_design0"&include_docs=true')
+    .get('/testdb2/_design_docs?include_docs=true')
     .reply(200, reply4)
   const data = await main.analyseAllDatabases(baseURL)
   const output = [{
