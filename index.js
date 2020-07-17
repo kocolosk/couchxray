@@ -184,7 +184,6 @@ const analyseDatabase = async (baseURL, dbName) => {
   const designDocs = ddocs.rows.map((d) => { return d.doc })
   const totalDocs = info.doc_count + info.doc_del_count
   const partitioned = !!(info.props && info.props.partitioned)
-
   const output = {
     databaseName: dbName,
     partitioned: partitioned,
@@ -196,7 +195,7 @@ const analyseDatabase = async (baseURL, dbName) => {
     billableSize: info.sizes.external,
     q: info.cluster.q, // Object.keys(shardInfo.shards).length,
     recommendedQDocs: Math.ceil((totalDocs + 1) / 10000000), // 10 million docs
-    recommendedQBytes: Math.ceil((info.other.data_size + 1) / (10 * 1073741824)), // 10GB
+    recommendedQBytes: Math.ceil((info.sizes.active + 1) / (10 * 1073741824)), // 10GB
     // designDocs: designDocs,
     indexes: analyseDesignDocs(designDocs),
     compatibility: { }
