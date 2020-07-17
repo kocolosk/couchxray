@@ -1,10 +1,10 @@
 {
   "name": "couchxray",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "CouchDB feature usage tool",
   "main": "index.js",
   "scripts": {
-    "test": "standard; jest",
+    "test": "standard && jest",
     "standard": "standard --fix"
   },
   "repository": {

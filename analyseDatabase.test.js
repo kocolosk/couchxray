@@ -37,7 +37,7 @@ test('analyseDatabase - no design docs', async () => {
   const scope = nock(baseURL)
     .get('/testdb')
     .reply(200, reply1)
-    .get('/testdb/_all_docs?startkey="_design"&endkey="_design0"&include_docs=true')
+    .get('/testdb/_design_docs?include_docs=true')
     .reply(200, reply2)
   const data = await main.analyseDatabase(baseURL, 'testdb')
   const output = {
@@ -153,7 +153,7 @@ test('analyseDatabase - one design doc', async () => {
   const scope = nock(baseURL)
     .get('/testdb')
     .reply(200, reply1)
-    .get('/testdb/_all_docs?startkey="_design"&endkey="_design0"&include_docs=true')
+    .get('/testdb/_design_docs?include_docs=true')
     .reply(200, reply2)
   const data = await main.analyseDatabase(baseURL, 'testdb')
   const output = {
