@@ -42,7 +42,7 @@ const analyseDesignDocs = (ddocs) => {
     }
   }
 
-  for (var i in ddocs) {
+  for (const i in ddocs) {
     let isQuery = false
     const ddoc = ddocs[i]
     if (ddoc.language && ddoc.language === 'query') {
@@ -69,7 +69,7 @@ const analyseDesignDocs = (ddocs) => {
         }
         obj.viewGroups.mapReduce++
       }
-      for (var j in ddoc.views) {
+      for (const j in ddoc.views) {
         const view = ddoc.views[j]
         if (view.dbcopy) {
           obj.dbcopy++
@@ -153,7 +153,7 @@ const analyseAllDatabases = async (baseURL) => {
     // iterate through each database
     const q = qrate(worker, CONCURRENCY, REQUESTS_PER_SECOND)
     nano.db.list().then((databaseList) => {
-      for (var i in databaseList) {
+      for (const i in databaseList) {
         q.push(databaseList[i])
       }
     })

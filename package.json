@@ -1,10 +1,10 @@
 {
   "name": "couchxray",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "CouchDB feature usage tool",
   "main": "index.js",
   "scripts": {
-    "test": "standard && jest",
+    "test": "standard && jest --watchAll=false --forceExit=true",
     "standard": "standard --fix"
   },
   "repository": {
@@ -22,15 +22,18 @@
   "homepage": "https://github.com/glynnbird/couchxray#readme",
   "dependencies": {
     "json-colorizer": "^2.2.2",
-    "nano": "^8.1.0",
+    "nano": "^9.0.1",
     "qrate": "^1.2.0"
   },
   "devDependencies": {
-    "jest": "^26.1.0",
-    "nock": "^13.0.2",
-    "standard": "^14.3.4"
+    "jest": "^26.6.3",
+    "nock": "^13.0.5",
+    "standard": "^16.0.3"
   },
   "bin": {
     "couchxray": "bin/couchxray.bin.js"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }

@@ -1,5 +1,6 @@
 # couchxray
-_couchxray_ is a command-line tool which outputs the CouchDB features used by a database and was inspired by the Python project [xray](https://github.com/cloudant-labs/xray) by Will Holley. On a per database basis, _couchxray outputs whether it is using:
+
+_couchxray_ is a command-line tool which outputs the CouchDB features used by a database and was inspired by the Python project [xray](https://github.com/cloudant-labs/xray) by Will Holley. On a per database basis, _couchxray_ outputs whether it is using:
 
 - global MapReduce views and which reducers (built-in or bespoke) are being used.
 - Lucene-based search indexes or Cloudant-specific Geospatial indexes.
