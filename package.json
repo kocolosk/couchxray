@@ -1,6 +1,6 @@
 {
   "name": "couchxray",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "CouchDB feature usage tool",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/glynnbird/couchxray#readme",
   "dependencies": {
-    "ccurllib": "^1.1.0",
+    "ccurllib": "^1.1.1",
     "json-colorizer": "^2.2.2",
     "nano": "^9.0.1",
     "qrate": "^1.2.0",
