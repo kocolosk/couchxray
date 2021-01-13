@@ -28,38 +28,32 @@ The URL containing the CouchDB service, including service credentials, should be
 e.g.
 
 ```sh
-> export COUCH_URL="https://username:password@host.cloudant.com"
-> couchxray
-```
-
-or
-
-```sh
 export COUCH_URL="https://username:password@host.cloudant.com"
-couchxray cities
+couchxray --db cities
 ```
 
 or
 
 ```sh
-couchxray "https://username:password@host.cloudant.com"
+couchxray --url "https://username:password@host.cloudant.com" --db cities
 ```
 
-or
-
-
-or
+or to use IBM IAM authentication
 
 ```sh
-couchxray "https://username:password@host.cloudant.com/cities"
+export COUCH_URL="https://host.cloudant.com"
+export IAM_API_KEY="MY_IAM_API_KEY"
+couchxray --db mydb
 ```
+
+Use `couchxray --help` for assistance with command-line options.
 
 ### Examining a single database
 
-If the URL supplied contains the database name, a single database is examined and the output data is presented as JSON.
+When running `couchxray` on a single database, it outputs a JSON object with its findings:
 
 ```sh
-> couchxray http://admin:admin@localhost:5984/cities
+> couchxray --url http://admin:admin@localhost:5984/cities
 {
   "databaseName": "cities",
   "partitioned": false,
@@ -128,20 +122,34 @@ If the URL supplied contains the database name, a single database is examined an
 }
 ```
 
+## Full scan mode
+
+Couchxray is usually quick to run because it can proceed with only a handful of API calls per database. It passed the `--scan` flag, `couchxray` will spool through each document in the database and check that:
+
+- the document ids are not greater than 512 bytes
+- the MapReduce keys are not greater than 8000 bytes
+- the MapReduce values are not greater than 64000 bytes
+
+These are pertinent if a user is wishing to move to CouchDB 4 (or Cloudant on Transaction Engine) which imposes some size limits on documeny keys and index key/values.
+
+Running in full scan mode will produce a `scan` object in the JSON output and will influence the `compatibility.couchDB4` object.
+
+> Don't use `--scan` unless you are interested in a thorough examination of whether a database is CouchDB 4 compatible.
+
 ### Examining all databases
 
 If the URL points to the "top level" of the CouchDB service, all of the databases are examined and the output data is presented as a CSV file:
 
 ```sh
 > couchxray http://admin:admin@localhost:5984
-databaseName,partitioned,numDocs,numDeletions,numDesignDocs,totalDocs,diskSize,billableSize,q,recommendedQDocs,recommendedQBytes,indexes.global.mapReduce,indexes.global.search,indexes.global.geo,indexes.global.mangoJSON,indexes.global.mangoText,indexes.partitioned.mapReduce,indexes.partitioned.search,indexes.partitioned.mangoJSON,indexes.partitioned.mangoText,indexes.viewGroups.mapReduce,indexes.viewGroups.search,indexes.viewGroups.mango,indexes.updates,indexes.shows,indexes.lists,indexes.vdus,indexes.dbcopy,indexes.reducers._count,indexes.reducers._sum,indexes.reducers._stats,indexes.reducers._approx_count_distinct,indexes.reducers.none,indexes.reducers.custom,compatibility.couchDB1.ok,compatibility.couchDB2.ok,compatibility.couchDB3.ok,compatibility.couchDB4.ok
-aaa,false,3,1,1,5,388179,173,16,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,true,true,true,true
-aa,false,2,0,0,2,2722750,2489192,16,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,true,true,true,true
-a,false,22,3,2,27,4353575,250017,16,1,1,0,0,0,1,1,0,0,0,0,0,0,2,0,0,0,0,0,1,0,0,0,0,0,false,mango,true,true,true
-_replicator,false,4,22,1,27,2297477,14447,16,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,true,true,true,true
-a1,false,1,0,0,1,154619,39,16,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,true,true,true,true
-ab,false,3,0,1,4,388147,387,16,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,true,true,true,true
-abb,false,1,0,0,1,154507,20,16,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,true,true,true,true
+databaseName,partitioned,numDocs,numDeletions,numDesignDocs,totalDocs,diskSize,billableSize,q,recommendedQDocs,recommendedQBytes,indexes.global.mapReduce,indexes.global.search,indexes.global.geo,indexes.global.mangoJSON,indexes.global.mangoText,indexes.partitioned.mapReduce,indexes.partitioned.search,indexes.partitioned.mangoJSON,indexes.partitioned.mangoText,indexes.viewGroups.mapReduce,indexes.viewGroups.search,indexes.viewGroups.mango,indexes.updates,indexes.shows,indexes.lists,indexes.vdus,indexes.dbcopy,indexes.reducers._count,indexes.reducers._sum,indexes.reducers._stats,indexes.reducers._approx_count_distinct,indexes.reducers.none,indexes.reducers.custom,compatibility.couchDB1.ok,compatibility.couchDB2.ok,compatibility.couchDB3.ok,compatibility.couchDB4.ok,scan.docIdTooBig
+aaa,false,3,1,1,5,388179,173,16,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,true,true,true,true,false
+aa,false,2,0,0,2,2722750,2489192,16,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,true,true,true,true,false
+a,false,22,3,2,27,4353575,250017,16,1,1,0,0,0,1,1,0,0,0,0,0,0,2,0,0,0,0,0,1,0,0,0,0,0,false,mango,true,true,true,false
+_replicator,false,4,22,1,27,2297477,14447,16,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,true,true,true,true,false
+a1,false,1,0,0,1,154619,39,16,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,true,true,true,true,false
+ab,false,3,0,1,4,388147,387,16,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,true,true,true,true,false
+abb,false,1,0,0,1,154507,20,16,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,true,true,true,true,false
 ```
 
 ## What does the output data mean?

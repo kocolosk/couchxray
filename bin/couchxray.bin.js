@@ -70,7 +70,7 @@ const main = async () => {
     console.log(colorize(data, { pretty: true }))
   } else if (argv.all_dbs) {
     // all databases
-    await couchxray.analyseAllDatabases(argv.url, argv.iam_api_key)
+    await couchxray.analyseAllDatabases(argv.url, argv.iam_api_key, argv.scan)
     process.exit(0)
   }
 }

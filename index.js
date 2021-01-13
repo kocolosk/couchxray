@@ -157,7 +157,7 @@ const analyseDesignDocs = (ddocs) => {
 
 // analyse all databases
 const analyseAllDatabases = async (baseURL, iamApiKey, doFullScan) => {
-  const CONCURRENCY = 5
+  const CONCURRENCY = 1
   const REQUESTS_PER_SECOND = 5
 
   // setup CouchDB connection
@@ -203,10 +203,12 @@ const fullScan = async (dbName, designDocs) => {
   const mapFunctions = {}
   for (const i in designDocs) {
     const ddoc = designDocs[i]
-    for (const j in ddoc.views) {
-      const view = ddoc.views[j]
-      if (view.map) {
-        mapFunctions[ddoc._id + '/' + j] = view.map
+    if (ddoc.language && ddoc.language !== 'query') {
+      for (const j in ddoc.views) {
+        const view = ddoc.views[j]
+        if (view.map && typeof view.map === 'string') {
+          mapFunctions[ddoc._id + '/' + j] = view.map
+        }
       }
     }
   }
