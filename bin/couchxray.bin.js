@@ -2,6 +2,7 @@
 const couchxray = require('..')
 const colorize = require('json-colorizer')
 const url = require('url')
+const yargs = require('yargs/yargs')
 
 const splitURL = (u) => {
   const retval = {
@@ -26,46 +27,50 @@ const splitURL = (u) => {
 
 // find CouchDB URL
 const envCouchURL = process.env.COUCH_URL
-let baseURL
-let databaseName
-if (envCouchURL) {
+const envIAMKey = process.env.IAM_API_KEY
+
+// parse the command-line URL
+const argv = yargs(process.argv)
+  .option('scan', { alias: 's', type: 'boolean', description: 'perform full database scan' })
+  .option('database', { alias: ['db', 'd'], type: 'string', description: 'single database to scan' })
+  .option('all_dbs', { alias: ['a', 'all-dbs'], type: 'boolean', description: 'scan all databases' })
+  .option('url', { alias: ['u'], type: 'string', description: 'URL of Cloudant service' })
+  .option('iam_api_key', { alias: ['i', 'iam-api-key'], type: 'string', description: 'IAM API key' })
+  .argv
+
+// take environment variables into account
+argv.url = argv.url || envCouchURL
+
+// extract database name from URL if present
+if (argv.url) {
   try {
-    const parsedEnvCouchURL = splitURL(envCouchURL)
-    baseURL = parsedEnvCouchURL.baseURL
-    databaseName = parsedEnvCouchURL.databaseName
+    const parsedEnvCouchURL = splitURL(argv.url)
+    argv.url = parsedEnvCouchURL.baseURL
+    argv.database = parsedEnvCouchURL.databaseName || argv.database
   } catch (e) {
-    console.error('Environment variable COUCH_URL is not a valid URL')
+    console.error('Not a valid URL')
     process.exit(1)
   }
 }
+argv.iam_api_key = argv.iam_api_key || envIAMKey
 
-// parse the command-line URL
-const arg = process.argv.length > 2 ? process.argv[2] : null
-if (!databaseName && arg) {
-  try {
-    // if the command-line argument is a URL
-    const parsedArg = splitURL(arg)
-    baseURL = parsedArg.baseURL
-    databaseName = parsedArg.databaseName
-  } catch (e) {
-    // otherwise it was a database name to be combined with the environment variable
-    if (baseURL) {
-      databaseName = arg
-    }
-  }
+// check for mandatory parameters
+if (!argv.url) {
+  throw new Error('Must supply a URL for the CouchDB service. See --help.')
+}
+if (!argv.database && !argv.all_dbs) {
+  throw new Error('Must supply a database name or choose to analyse all databases. See --help.')
 }
 
-if (!baseURL) {
-  console.error('You must supply a URL as a COUCH_URL environment variable or as a command-line parameter')
-  process.exit(1)
-}
-
+// main
 const main = async () => {
-  if (databaseName) {
-    const data = await couchxray.analyseDatabase(baseURL, databaseName)
+  // single database
+  if (argv.database) {
+    const data = await couchxray.analyseDatabase(argv.url, argv.database, argv.iam_api_key, argv.scan)
     console.log(colorize(data, { pretty: true }))
-  } else {
-    await couchxray.analyseAllDatabases(baseURL)
+  } else if (argv.all_dbs) {
+    // all databases
+    await couchxray.analyseAllDatabases(argv.url, argv.iam_api_key)
     process.exit(0)
   }
 }
